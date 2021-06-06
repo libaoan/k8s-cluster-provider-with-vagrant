@@ -83,24 +83,12 @@ EOF
 if [[ $1 -eq 1 ]]
 then
     yum install -y etcd
-    #cp /vagrant/systemd/etcd.service /usr/lib/systemd/system/
-
-cat > /etc/etcd/etcd.conf <<EOF
-#[Member]
-ETCD_DATA_DIR="/var/lib/etcd/default.etcd"
-ETCD_LISTEN_PEER_URLS="http://$2:2380"
-ETCD_LISTEN_CLIENT_URLS="http://$2:2379,http://localhost:2379"
-ETCD_NAME="node$1"
-
-#[Clustering]
-ETCD_INITIAL_ADVERTISE_PEER_URLS="http://$2:2380"
-ETCD_ADVERTISE_CLIENT_URLS="http://$2:2379"
-ETCD_INITIAL_CLUSTER="$3"
-ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster"
-ETCD_INITIAL_CLUSTER_STATE="new"
-EOF
-
-cat /etc/etcd/etcd.conf
+    mkdir -p /etc/etcd/ssl/
+    mkdir -p /etc/etcd/conf/
+    cp /vagrant/pki/TLS/etcd/*pem /etc/etcd/ssl/
+    cp /vagrant/conf/etcd-common.conf /etc/etcd/conf/
+    cp /vagrant/node1/etcd.conf /etc/etcd/conf/
+    cp /vagrant/systemd/etcd.service /usr/lib/systemd/system/
 
 # create network config in etcd
 echo 'create network config in etcd'
@@ -109,7 +97,6 @@ cat > /etc/etcd/etcd-init.sh<<EOF
 etcdctl mkdir /kube-centos/network
 etcdctl mk /kube-centos/network/config '{"Network":"172.33.0.0/16","SubnetLen":24,"Backend":{"Type":"host-gw"}}'
 EOF
-
 
 chmod +x /etc/etcd/etcd-init.sh
 echo 'start etcd...'
@@ -150,37 +137,32 @@ systemctl start docker
 # copy pem, token files
 echo "copy pem, token files"
 mkdir -p /etc/kubernetes/ssl
-cp /vagrant/pki/* /etc/kubernetes/ssl/
-cp /vagrant/conf/token.csv /etc/kubernetes/
-cp /vagrant/conf/bootstrap.kubeconfig /etc/kubernetes/
-cp /vagrant/conf/kube-proxy.kubeconfig /etc/kubernetes/
-cp /vagrant/conf/kubelet.kubeconfig /etc/kubernetes/
+mkdir -p /etc/kubernetes/conf
+mkdir -p /var/log/kubernetes
+cp /vagrant/pki/TLS/k8s/*pem /etc/kubernetes/ssl/
+cp /vagrant/conf/*.kubeconfig /etc/kubernetes/conf/
+cp /vagrant/conf/token.csv /etc/kubernetes/conf/
 
 # unpack tar.gz and moving kubernetes bin file to /usr/bin
 echo 'unpack tar.gz and moving kubernetes bin file to /usr/bin ...'
 tar -xzvf /vagrant/kubernetes-server-linux-amd64.tar.gz --no-same-owner -C /vagrant
 cp /vagrant/kubernetes/server/bin/* /usr/bin
 
-# add systemd config
-echo 'add systemd config...'
-dos2unix -q /vagrant/systemd/*.service
-cp /vagrant/systemd/*.service /usr/lib/systemd/system/
-
-
-mkdir -p /var/lib/kubelet
-mkdir -p ~/.kube
-cp /vagrant/conf/admin.kubeconfig ~/.kube/config
-
 if [[ $1 -eq 1 ]]
 then
     echo "configure master on node node1"
+    cp /vagrant/conf/*.conf /etc/kubernetes/conf/
+    cp /vagrant/node1/* /etc/kubernetes/conf/
 
-    cp /vagrant/conf/apiserver /etc/kubernetes/
-    cp /vagrant/conf/config /etc/kubernetes/
-    cp /vagrant/conf/controller-manager /etc/kubernetes/
-    cp /vagrant/conf/scheduler /etc/kubernetes/
-    cp /vagrant/conf/scheduler.conf /etc/kubernetes/
-    cp /vagrant/node1/* /etc/kubernetes/
+    # add systemd config
+    echo 'add systemd config...'
+    dos2unix -q /vagrant/systemd/*.service
+    cp /vagrant/systemd/*.service /usr/lib/systemd/system/
+
+
+    mkdir -p /var/lib/kubelet
+    mkdir -p ~/.kube
+    cp /vagrant/conf/admin.kubeconfig ~/.kube/config
 
     systemctl daemon-reload
     systemctl enable kube-apiserver
@@ -197,6 +179,11 @@ then
 
     systemctl enable kube-proxy
     systemctl start kube-proxy
+
+# permit kubelet-bootstrap request
+kubectl create clusterrolebinding kubelet-bootstrap \
+--clusterrole=system:node-bootstrapper \
+--user=kubelet-bootstrap
 fi
 
 if [[ $1 -eq 2 ]]
