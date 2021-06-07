@@ -6,9 +6,10 @@ Wants=network-online.target
 
 [Service]
 Type=notify
-EnvironmentFile=-/etc/etcd/cfg/etcd.conf
-EnvironmentFile=-/etc/etcd/cfg/etcd-commom.conf
-ExecStart=/usr/bin/etcd $ETCD_ARGS
+EnvironmentFile=-/etc/etcd/conf/etcd.conf
+#EnvironmentFile=-/etc/etcd/conf/etcd-commom.conf
+#ExecStart=/usr/bin/etcd $ETCD_ARGS
+ExecStart=/usr/bin/etcd --config-file=/etc/etcd/conf/etcd.config.yaml
 Restart=on-failure
 LimitNOFILE=65536
 

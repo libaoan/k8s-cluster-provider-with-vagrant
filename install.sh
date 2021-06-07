@@ -86,8 +86,9 @@ then
     mkdir -p /etc/etcd/ssl/
     mkdir -p /etc/etcd/conf/
     cp /vagrant/pki/TLS/etcd/*pem /etc/etcd/ssl/
-    cp /vagrant/conf/etcd-common.conf /etc/etcd/conf/
-    cp /vagrant/node1/etcd.conf /etc/etcd/conf/
+    # cp /vagrant/conf/etcd-common.conf /etc/etcd/conf/
+    # cp /vagrant/node1/etcd.conf /etc/etcd/conf/
+    cp /vagrant/node1/etcd.config.yaml /etc/etcd/conf/
     cp /vagrant/systemd/etcd.service /usr/lib/systemd/system/
 
 # create network config in etcd

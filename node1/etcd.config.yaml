@@ -1,0 +1,22 @@
+
+name: etcd-1
+data-dir: /var/lib/etcd/default.etcd
+listen-peer-urls: https://172.17.8.201:2380
+listen-client-urls: https://172.17.8.201:2379
+
+initial-advertise-peer-urls: https://172.17.8.201:2380
+advertise-client-urls: https://172.17.8.201:2379
+initial-cluster: etcd-1=https://172.17.8.201:2380
+initial-cluster-token: 'etcd-cluster'
+initial-cluster-state: 'new'
+
+client-transport-security:
+  cert-file: /etc/etcd/ssl/etcd.pem
+  key-file: /etc/etcd/ssl/etcd-key.pem
+  trusted-ca-file: /etc/etcd/ssl/ca.pem
+  client-cert-auth: true
+peer-transport-security:
+  cert-file: /etc/etcd/ssl/etcd.pem
+  key-file: /etc/etcd/ssl/etcd-key.pem
+  trusted-ca-file: /etc/etcd/ssl/ca.pem
+  client-cert-auth: true

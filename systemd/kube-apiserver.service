@@ -5,7 +5,7 @@ After=network.target
 After=etcd.service
 
 [Service]
-EnvironmentFile=-/etc/kubernetes/kube-apiserver.conf
+EnvironmentFile=-/etc/kubernetes/conf/kube-apiserver.conf
 ExecStart=/usr/bin/kube-apiserver $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_LOG_DIR $KUBE_ETCD_SERVERS $KUBE_API_ADDRESS $KUBE_API_PORT  $KUBE_SERVICE_ADDRESSES $ENABLE_KUBE_ADMISSION_PLUGINS $KUBE_API_ARGS
 Restart=on-failure
 Type=notify
