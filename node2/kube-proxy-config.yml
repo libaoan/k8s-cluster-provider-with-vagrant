@@ -4,5 +4,5 @@ bindAddress: 0.0.0.0
 metricsBindAddress: 0.0.0.0:10249
 clientConnection:
   kubeconfig: /etc/kubernetes/conf/kube-proxy.kubeconfig
-hostnameOverride: node1
+hostnameOverride: node2
 clusterCIDR: 10.254.0.0/16

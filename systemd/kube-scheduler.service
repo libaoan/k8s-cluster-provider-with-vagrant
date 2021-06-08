@@ -3,7 +3,7 @@ Description=Kubernetes Scheduler Plugin
 Documentation=https://github.com/GoogleCloudPlatform/kubernetes
 
 [Service]
-EnvironmentFile=-/etc/kubernetes/kube-scheduler.conf
+EnvironmentFile=-/etc/kubernetes/conf/kube-scheduler.conf
 ExecStart=/usr/bin/kube-scheduler $KUBE_LOGTOSTDERR $KUBE_LOG_LEVEL $KUBE_LOG_DIR $KUBE_SCHEDULER_CONF $KUBE_SCHEDULER_ARGS
 Restart=on-failure
 LimitNOFILE=65536
